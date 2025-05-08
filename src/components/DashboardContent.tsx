@@ -1,64 +1,17 @@
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import StatCards from './StatCards';
 import KanbanBoard from './KanbanBoard';
 import ChartPanel from './ChartPanel';
 import { Order } from '../types';
 import { toast } from 'sonner';
+import { supabase } from "../integrations/supabase/client";
 
 const DashboardContent = () => {
-  // Sample data
-  const [orders, setOrders] = useState<Order[]>([
-    {
-      id: '5423',
-      customerName: 'Marcos Silva',
-      items: ['1x Açaí 500ml', '2x Leite em pó', '1x Banana'],
-      phone: '(11) 98765-4321',
-      time: '14:30',
-      status: 'new'
-    },
-    {
-      id: '5424',
-      customerName: 'Ana Costa',
-      items: ['2x Açaí 300ml', '1x Granola', '2x Morango'],
-      phone: '(11) 97123-5678',
-      time: '14:35',
-      status: 'new'
-    },
-    {
-      id: '5421',
-      customerName: 'João Pereira',
-      items: ['1x Açaí 700ml', '3x Nutella', '1x Morango'],
-      phone: '(11) 99432-8765',
-      time: '14:20',
-      status: 'preparing'
-    },
-    {
-      id: '5420',
-      customerName: 'Carla Mendes',
-      items: ['2x Açaí 300ml', '2x Granola', '1x Banana'],
-      phone: '(11) 95678-2143',
-      time: '14:15',
-      status: 'ready'
-    },
-    {
-      id: '5418',
-      customerName: 'Pedro Oliveira',
-      items: ['1x Açaí 500ml', '1x Leite Cond.', '2x Kiwi'],
-      phone: '(11) 91234-8765',
-      time: '14:00',
-      status: 'completed'
-    },
-    {
-      id: '5419',
-      customerName: 'Renata Lima',
-      items: ['1x Açaí 700ml', '2x Chocolate', '1x Morango'],
-      phone: '(11) 94567-1234',
-      time: '14:05',
-      status: 'completed'
-    },
-  ]);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
+  // Dados para os gráficos (ainda mockados por simplicidade)
   const hourlyData = [
     { time: '10-12h', orders: 10 },
     { time: '12-15h', orders: 15 },
@@ -73,21 +26,108 @@ const DashboardContent = () => {
     { name: 'Mix Berry', count: 20 },
   ];
 
-  // Handler to move order to next status
-  const handleMoveOrder = (orderId: string) => {
-    setOrders(prev => prev.map(order => {
-      if (order.id === orderId) {
-        const newStatus = 
-          order.status === 'new' ? 'preparing' :
-          order.status === 'preparing' ? 'ready' :
-          order.status === 'ready' ? 'completed' :
-          order.status;
-        
-        toast.success(`Pedido #${orderId} movido para ${getStatusLabel(newStatus)}`);
-        return { ...order, status: newStatus };
+  // Buscar pedidos do Supabase
+  const fetchOrders = async () => {
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('acai_concept_dashboard_lovable01')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      if (data) {
+        // Converter os dados do Supabase para o formato utilizado no front-end
+        const formattedOrders: Order[] = data.map(order => {
+          // Formatar a hora a partir do timestamp created_at
+          const createdAt = new Date(order.created_at);
+          const hours = createdAt.getHours().toString().padStart(2, '0');
+          const minutes = createdAt.getMinutes().toString().padStart(2, '0');
+          const time = `${hours}:${minutes}`;
+
+          // Converter items de JSONB para string[]
+          const itemsArray = Array.isArray(order.items) 
+            ? order.items.map(item => `${item.quantity}x ${item.name}`) 
+            : [];
+
+          return {
+            id: order.id,
+            customerName: order.customer_name,
+            items: itemsArray,
+            phone: order.phone,
+            time: time,
+            status: order.status
+          };
+        });
+
+        setOrders(formattedOrders);
       }
-      return order;
-    }));
+    } catch (error) {
+      console.error('Erro ao buscar pedidos:', error);
+      toast.error('Falha ao carregar pedidos');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchOrders();
+    
+    // Configurar atualização em tempo real
+    const channel = supabase
+      .channel('acai_orders_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'acai_concept_dashboard_lovable01'
+        },
+        () => {
+          fetchOrders();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  // Handler para mover o pedido para o próximo status
+  const handleMoveOrder = async (orderId: string, currentStatus: string) => {
+    // Determinar o próximo status
+    const nextStatus = 
+      currentStatus === 'new' ? 'preparing' :
+      currentStatus === 'preparing' ? 'ready' :
+      currentStatus === 'ready' ? 'completed' :
+      currentStatus;
+    
+    // Se não houver mudança, não faz nada
+    if (nextStatus === currentStatus) return;
+
+    try {
+      const { error } = await supabase
+        .from('acai_concept_dashboard_lovable01')
+        .update({ status: nextStatus })
+        .eq('id', orderId);
+
+      if (error) throw error;
+
+      // Atualizar o estado local para resposta instantânea da UI
+      setOrders(prevOrders => prevOrders.map(order => {
+        if (order.id === orderId) {
+          return { ...order, status: nextStatus };
+        }
+        return order;
+      }));
+
+      toast.success(`Pedido #${orderId.substring(0, 5)} movido para ${getStatusLabel(nextStatus)}`);
+    } catch (error) {
+      console.error('Erro ao atualizar pedido:', error);
+      toast.error('Falha ao atualizar pedido');
+    }
   };
 
   const getStatusLabel = (status: string) => {
@@ -104,7 +144,7 @@ const DashboardContent = () => {
     toast.info('Funcionalidade de novo pedido em breve!');
   };
 
-  // Filter orders by status
+  // Filtrar pedidos por status
   const newOrders = orders.filter(order => order.status === 'new');
   const preparingOrders = orders.filter(order => order.status === 'preparing');
   const readyOrders = orders.filter(order => order.status === 'ready');
@@ -128,6 +168,7 @@ const DashboardContent = () => {
             completedOrders={completedOrders}
             onMoveOrder={handleMoveOrder}
             onNewOrder={handleNewOrder}
+            isLoading={isLoading}
           />
         </div>
 
