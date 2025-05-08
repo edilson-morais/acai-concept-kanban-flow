@@ -9,6 +9,7 @@ interface KanbanBoardProps {
   readyOrders: Order[];
   completedOrders: Order[];
   onMoveOrder: (id: string, currentStatus: string) => void;
+  onMoveBackOrder: (id: string, currentStatus: string) => void;
   onNewOrder: () => void;
   isLoading?: boolean;
 }
@@ -19,6 +20,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
   readyOrders,
   completedOrders,
   onMoveOrder,
+  onMoveBackOrder,
   onNewOrder,
   isLoading = false
 }) => {
@@ -47,24 +49,31 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
             orders={newOrders} 
             color="bg-acai-500 bg-opacity-80" 
             onMoveOrder={(id) => onMoveOrder(id, 'new')} 
+            showBackButton={false}
           />
           <KanbanColumn 
             title="Em Preparo" 
             orders={preparingOrders} 
             color="bg-acai-600 bg-opacity-80" 
             onMoveOrder={(id) => onMoveOrder(id, 'preparing')} 
+            onMoveBack={(id) => onMoveBackOrder(id, 'preparing')} 
+            showBackButton={true}
           />
           <KanbanColumn 
             title="Pronto p/ Entrega" 
             orders={readyOrders} 
             color="bg-acai-700 bg-opacity-80" 
             onMoveOrder={(id) => onMoveOrder(id, 'ready')} 
+            onMoveBack={(id) => onMoveBackOrder(id, 'ready')} 
+            showBackButton={true}
           />
           <KanbanColumn 
             title="Finalizado" 
             orders={completedOrders} 
             color="bg-acai-800 bg-opacity-80" 
-            showMoveButton={false} 
+            showMoveButton={false}
+            onMoveBack={(id) => onMoveBackOrder(id, 'completed')} 
+            showBackButton={true} 
           />
         </div>
       )}

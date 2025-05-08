@@ -47,9 +47,28 @@ const DashboardContent = () => {
           const time = `${hours}:${minutes}`;
 
           // Converter items de JSONB para string[]
-          const itemsArray = Array.isArray(order.items) 
-            ? order.items.map(item => `${item.quantity}x ${item.name}`) 
-            : [];
+          let itemsArray: string[] = [];
+          if (Array.isArray(order.items)) {
+            itemsArray = order.items.map(item => {
+              // Assegurar que os itens têm a estrutura esperada
+              if (typeof item === 'object' && item !== null) {
+                const quantity = (item as any).quantity;
+                const name = (item as any).name;
+                if (quantity && name) {
+                  return `${quantity}x ${name}`;
+                }
+              }
+              return "Item desconhecido";
+            });
+          }
+
+          // Garantir que o status é do tipo esperado
+          const status = (order.status === 'new' || 
+                          order.status === 'preparing' || 
+                          order.status === 'ready' || 
+                          order.status === 'completed') 
+                          ? order.status 
+                          : 'new' as const;
 
           return {
             id: order.id,
@@ -57,7 +76,7 @@ const DashboardContent = () => {
             items: itemsArray,
             phone: order.phone,
             time: time,
-            status: order.status
+            status: status
           };
         });
 
@@ -118,12 +137,47 @@ const DashboardContent = () => {
       // Atualizar o estado local para resposta instantânea da UI
       setOrders(prevOrders => prevOrders.map(order => {
         if (order.id === orderId) {
-          return { ...order, status: nextStatus };
+          return { ...order, status: nextStatus as Order['status'] };
         }
         return order;
       }));
 
       toast.success(`Pedido #${orderId.substring(0, 5)} movido para ${getStatusLabel(nextStatus)}`);
+    } catch (error) {
+      console.error('Erro ao atualizar pedido:', error);
+      toast.error('Falha ao atualizar pedido');
+    }
+  };
+
+  // Handler para voltar o pedido para o status anterior
+  const handleMoveBackOrder = async (orderId: string, currentStatus: string) => {
+    // Determinar o status anterior
+    const previousStatus = 
+      currentStatus === 'preparing' ? 'new' :
+      currentStatus === 'ready' ? 'preparing' :
+      currentStatus === 'completed' ? 'ready' :
+      currentStatus;
+    
+    // Se não houver mudança, não faz nada
+    if (previousStatus === currentStatus) return;
+
+    try {
+      const { error } = await supabase
+        .from('acai_concept_dashboard_lovable01')
+        .update({ status: previousStatus })
+        .eq('id', orderId);
+
+      if (error) throw error;
+
+      // Atualizar o estado local para resposta instantânea da UI
+      setOrders(prevOrders => prevOrders.map(order => {
+        if (order.id === orderId) {
+          return { ...order, status: previousStatus as Order['status'] };
+        }
+        return order;
+      }));
+
+      toast.success(`Pedido #${orderId.substring(0, 5)} movido de volta para ${getStatusLabel(previousStatus)}`);
     } catch (error) {
       console.error('Erro ao atualizar pedido:', error);
       toast.error('Falha ao atualizar pedido');
@@ -167,6 +221,7 @@ const DashboardContent = () => {
             readyOrders={readyOrders}
             completedOrders={completedOrders}
             onMoveOrder={handleMoveOrder}
+            onMoveBackOrder={handleMoveBackOrder}
             onNewOrder={handleNewOrder}
             isLoading={isLoading}
           />

@@ -8,7 +8,9 @@ interface KanbanColumnProps {
   orders: Order[];
   color: string;
   showMoveButton?: boolean;
+  showBackButton?: boolean;
   onMoveOrder?: (id: string) => void;
+  onMoveBack?: (id: string) => void;
 }
 
 const KanbanColumn: React.FC<KanbanColumnProps> = ({
@@ -16,7 +18,9 @@ const KanbanColumn: React.FC<KanbanColumnProps> = ({
   orders,
   color,
   showMoveButton = true,
+  showBackButton = false,
   onMoveOrder,
+  onMoveBack,
 }) => {
   return (
     <div className="flex flex-col h-full w-full min-w-[250px] max-w-xs">
@@ -31,7 +35,9 @@ const KanbanColumn: React.FC<KanbanColumnProps> = ({
               order={order}
               borderColor={color}
               showMoveButton={showMoveButton}
+              showBackButton={showBackButton}
               onMove={onMoveOrder ? () => onMoveOrder(order.id) : undefined}
+              onMoveBack={onMoveBack ? () => onMoveBack(order.id) : undefined}
             />
           ))}
         </div>
