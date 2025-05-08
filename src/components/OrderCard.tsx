@@ -28,11 +28,11 @@ const OrderCard: React.FC<OrderCardProps> = ({
 
       <div className="flex items-center mt-3">
         <div className="flex items-center">
-          <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center mr-2">
-            <svg viewBox="0 0 24 24" width="12" height="12" stroke="white" strokeWidth="2" fill="none">
-              <path d="M20 6L9 17L4 12"></path>
-            </svg>
-          </div>
+          <img 
+            src="/lovable-uploads/309e28ab-5886-4434-bf52-d2045d8d03f6.png" 
+            alt="WhatsApp" 
+            className="w-5 h-5 mr-2" 
+          />
           <span className="text-xs text-acai-300">{order.phone}</span>
         </div>
       </div>
