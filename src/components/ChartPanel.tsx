@@ -10,7 +10,7 @@ interface ChartPanelProps {
 const ChartPanel: React.FC<ChartPanelProps> = ({ hourlyData, topSellingItems }) => {
   return (
     <div className="flex flex-col bg-acai-900 rounded-lg p-4 h-full">
-      <h3 className="text-base font-bold mb-4 text-center">Pedidos por Hora</h3>
+      <h3 className="text-base font-bold mb-4 text-center text-white">Pedidos por Hora</h3>
 
       <div className="h-48">
         <ResponsiveContainer width="100%" height="100%">
@@ -27,7 +27,7 @@ const ChartPanel: React.FC<ChartPanelProps> = ({ hourlyData, topSellingItems }) 
         </ResponsiveContainer>
       </div>
 
-      <h3 className="text-base font-bold mt-6 mb-4 text-center">Mais Vendidos</h3>
+      <h3 className="text-base font-bold mt-6 mb-4 text-center text-white">Mais Vendidos</h3>
       <div className="space-y-3 mt-2">
         {topSellingItems.map((item, idx) => (
           <div key={idx} className="relative">

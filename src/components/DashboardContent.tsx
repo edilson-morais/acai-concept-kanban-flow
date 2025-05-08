@@ -206,28 +206,30 @@ const DashboardContent = () => {
 
   return (
     <main className="flex-1 overflow-y-auto p-6">
-      <StatCards 
-        newOrdersCount={newOrders.length} 
-        totalOrdersCount={orders.length} 
-        preparingOrdersCount={preparingOrders.length} 
-        completedOrdersCount={completedOrders.length} 
-      />
-      
-      <div className="flex h-[calc(100%-130px)]">
-        <div className="flex-1">
-          <KanbanBoard 
-            newOrders={newOrders}
-            preparingOrders={preparingOrders}
-            readyOrders={readyOrders}
-            completedOrders={completedOrders}
-            onMoveOrder={handleMoveOrder}
-            onMoveBackOrder={handleMoveBackOrder}
-            onNewOrder={handleNewOrder}
-            isLoading={isLoading}
+      <div className="flex flex-col md:flex-row gap-5">
+        <div className="md:w-3/4">
+          <StatCards 
+            newOrdersCount={newOrders.length} 
+            totalOrdersCount={orders.length} 
+            preparingOrdersCount={preparingOrders.length} 
+            completedOrdersCount={completedOrders.length} 
           />
+          
+          <div className="mt-5 h-[calc(100vh-230px)]">
+            <KanbanBoard 
+              newOrders={newOrders}
+              preparingOrders={preparingOrders}
+              readyOrders={readyOrders}
+              completedOrders={completedOrders}
+              onMoveOrder={handleMoveOrder}
+              onMoveBackOrder={handleMoveBackOrder}
+              onNewOrder={handleNewOrder}
+              isLoading={isLoading}
+            />
+          </div>
         </div>
-
-        <div className="w-72 ml-5">
+        
+        <div className="md:w-1/4 min-w-[220px]">
           <ChartPanel 
             hourlyData={hourlyData} 
             topSellingItems={topSellingItems} 
