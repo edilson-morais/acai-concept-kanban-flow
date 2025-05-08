@@ -206,8 +206,8 @@ const DashboardContent = () => {
 
   return (
     <main className="flex-1 overflow-y-auto p-6">
-      <div className="flex flex-col md:flex-row gap-5">
-        <div className="md:w-3/4">
+      <div className="flex flex-col gap-5">
+        <div className="w-full">
           <StatCards 
             newOrdersCount={newOrders.length} 
             totalOrdersCount={orders.length} 
@@ -215,7 +215,7 @@ const DashboardContent = () => {
             completedOrdersCount={completedOrders.length} 
           />
           
-          <div className="mt-5 h-[calc(100vh-230px)]">
+          <div className="mt-5 h-[calc(100vh-350px)]">
             <KanbanBoard 
               newOrders={newOrders}
               preparingOrders={preparingOrders}
@@ -229,7 +229,7 @@ const DashboardContent = () => {
           </div>
         </div>
         
-        <div className="md:w-1/4 min-w-[220px]">
+        <div className="w-full mt-5 h-64">
           <ChartPanel 
             hourlyData={hourlyData} 
             topSellingItems={topSellingItems} 
