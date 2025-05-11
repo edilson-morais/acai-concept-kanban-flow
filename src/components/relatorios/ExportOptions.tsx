@@ -17,9 +17,9 @@ const ExportOptions: React.FC = () => {
   };
   
   return (
-    <Card className="mt-4 shadow-md">
+    <Card className="mt-4 shadow-lg bg-acai-800 bg-opacity-30 backdrop-blur-sm border border-acai-700">
       <div className="p-4">
-        <h3 className="text-base md:text-lg font-bold mb-3">Exportar Relatório</h3>
+        <h3 className="text-base md:text-lg font-bold mb-3 text-white">Exportar Relatório</h3>
         <div className="flex flex-wrap gap-2">
           <Button 
             variant="default" 
@@ -31,7 +31,7 @@ const ExportOptions: React.FC = () => {
           </Button>
           <Button 
             variant="outline"
-            className="hover:bg-acai-400 hover:text-white transition-colors shadow-md"
+            className="border-acai-400 text-white hover:bg-acai-400 hover:text-white transition-colors shadow-md"
             onClick={() => handleExport('Excel')}
           >
             <FileSpreadsheet className="mr-1 h-4 w-4" />
@@ -39,7 +39,7 @@ const ExportOptions: React.FC = () => {
           </Button>
           <Button 
             variant="outline"
-            className="hover:bg-acai-400 hover:text-white transition-colors shadow-md"
+            className="border-acai-400 text-white hover:bg-acai-400 hover:text-white transition-colors shadow-md"
             onClick={() => handleExport('CSV')}
           >
             <Download className="mr-1 h-4 w-4" />
