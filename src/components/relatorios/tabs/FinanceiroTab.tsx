@@ -123,7 +123,7 @@ const FinanceiroTab: React.FC = () => {
         {/* Gráfico de Distribuição de Despesas com visual melhorado */}
         <Card className="bg-acai-900 bg-opacity-70 p-4 shadow-lg backdrop-blur-sm border border-acai-700">
           <h3 className="text-base md:text-lg font-bold mb-4 text-white">Distribuição de Despesas</h3>
-          <div className="h-64 mt-4 pb-8"> {/* Added mt-4 for top margin and pb-8 for padding at bottom */}
+          <div className="h-64 mt-2 pb-6"> {/* Reduced padding-bottom from pb-8 to pb-6 */}
             <ChartContainer
               config={{
                 insumos: { color: '#8B5CF6', label: 'Insumos' },
@@ -133,11 +133,11 @@ const FinanceiroTab: React.FC = () => {
                 outros: { color: '#D6BCFA', label: 'Outros' },
               }}
             >
-              <PieChart margin={{ top: 0, right: 0, bottom: 25, left: 0 }}> {/* Added bottom margin to push chart up */}
+              <PieChart margin={{ top: 0, right: 0, bottom: 25, left: 0 }}>
                 <Pie
                   data={distribuicaoDespesas}
                   cx="50%"
-                  cy="45%" /* Changed from 50% to 45% to move chart up */
+                  cy="40%" /* Changed from 45% to 40% to move chart higher */
                   innerRadius={isMobile ? 55 : 75}
                   outerRadius={isMobile ? 85 : 105}
                   paddingAngle={4}
@@ -176,15 +176,17 @@ const FinanceiroTab: React.FC = () => {
             </ChartContainer>
           </div>
           
-          {/* Legenda melhorada com estilo de pílula - moved further down */}
-          <div className="flex flex-wrap justify-center mt-2 gap-3"> {/* Changed mt-5 to mt-2 */}
+          {/* Legenda melhorada com estilo de pílula - reduced height */}
+          <div className="flex flex-wrap justify-center gap-2"> {/* Changed gap-3 to gap-2 and removed mt-2 */}
             {distribuicaoDespesas.map((entry, index) => (
               <div 
                 key={index} 
-                className="flex items-center text-xs rounded-full bg-acai-800 px-3 py-1.5 shadow-md border border-acai-700"
+                className="flex items-center text-xs rounded-full bg-acai-800 px-2.5 py-1 shadow-md border border-acai-700" 
+                /* Reduced py-1.5 to py-1 and px-3 to px-2.5 to make pills smaller */
               >
                 <div 
-                  className="w-3.5 h-3.5 mr-2 rounded-full shadow-inner" 
+                  className="w-3 h-3 mr-1.5 rounded-full shadow-inner" 
+                  /* Reduced w-3.5 h-3.5 to w-3 h-3 and mr-2 to mr-1.5 */
                   style={{ backgroundColor: COLORS[index % COLORS.length] }}
                 ></div>
                 <span className="whitespace-nowrap text-white font-medium">{entry.categoria} ({entry.valor}%)</span>
