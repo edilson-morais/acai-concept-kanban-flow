@@ -15,7 +15,7 @@ import {
   ChartTooltip, 
   ChartTooltipContent 
 } from "@/components/ui/chart";
-import { CalendarDays, Download, ArrowUp, ArrowDown, FileChart } from "lucide-react";
+import { CalendarDays, Download, ArrowUp, ArrowDown, FileText } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -246,7 +246,7 @@ const Relatorios = () => {
                 <h3 className="text-base md:text-lg font-bold mb-3">Exportar Relatório</h3>
                 <div className="flex flex-wrap gap-2">
                   <Button variant="default" className="bg-acai-500 hover:bg-acai-600">
-                    <FileChart className="mr-1 h-4 w-4" />
+                    <FileText className="mr-1 h-4 w-4" />
                     PDF
                   </Button>
                   <Button variant="outline">
