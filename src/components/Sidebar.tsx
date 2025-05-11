@@ -1,36 +1,38 @@
 
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { LayoutDashboard, FileSearch, Settings, Lock } from "lucide-react";
 import Logo from "./Logo";
 
 const Sidebar = () => {
+  const location = useLocation();
+  
   const menuItems = [
     {
       title: "Dashboard",
       icon: <LayoutDashboard size={20} />,
       path: "/",
-      active: true,
+      active: location.pathname === "/",
       restricted: false
     },
     {
       title: "Pedidos",
       icon: <FileSearch size={20} />,
       path: "/pedidos",
-      active: false,
+      active: location.pathname === "/pedidos",
       restricted: false
     },
     {
       title: "Relatórios",
       icon: <FileSearch size={20} />,
       path: "/relatorios",
-      active: false,
+      active: location.pathname === "/relatorios",
       restricted: true
     },
     {
       title: "Configurações",
       icon: <Settings size={20} />,
       path: "/configuracoes",
-      active: false,
+      active: location.pathname === "/configuracoes",
       restricted: true
     },
   ];
