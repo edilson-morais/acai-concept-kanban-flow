@@ -5,6 +5,7 @@ import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tool
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { ArrowUp, ArrowDown } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { ChartContainer, ChartTooltipContent } from "@/components/ui/chart";
 
 // Dados mockados para o financeiro
 const receitasDespesas = [
@@ -19,14 +20,14 @@ const receitasDespesas = [
 ];
 
 const distribuicaoDespesas = [
-  { categoria: 'Insumos', valor: 45, color: '#7B2CBF' },
-  { categoria: 'Funcionários', valor: 25, color: '#9D4EDD' },
-  { categoria: 'Aluguel', valor: 15, color: '#5A189A' },
-  { categoria: 'Marketing', valor: 10, color: '#3C096C' },
-  { categoria: 'Outros', valor: 5, color: '#240046' },
+  { categoria: 'Insumos', valor: 45, color: '#9b87f5' },
+  { categoria: 'Funcionários', valor: 25, color: '#7E69AB' },
+  { categoria: 'Aluguel', valor: 15, color: '#6E59A5' },
+  { categoria: 'Marketing', valor: 10, color: '#8B5CF6' },
+  { categoria: 'Outros', valor: 5, color: '#D6BCFA' },
 ];
 
-const COLORS = ['#7B2CBF', '#9D4EDD', '#5A189A', '#3C096C', '#240046'];
+const COLORS = ['#9b87f5', '#7E69AB', '#6E59A5', '#8B5CF6', '#D6BCFA'];
 
 const FinanceiroTab: React.FC = () => {
   const isMobile = useIsMobile();
@@ -40,7 +41,7 @@ const FinanceiroTab: React.FC = () => {
     <div className="space-y-5 mt-4">
       {/* Cards de resumo financeiro */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="bg-gradient-to-r from-acai-500 to-acai-600 p-4">
+        <Card className="bg-gradient-to-r from-acai-500 to-acai-600 p-4 shadow-lg">
           <h3 className="text-sm md:text-base font-medium">Receita Total</h3>
           <p className="text-xl md:text-2xl font-bold mt-3">R$ {totalReceitas.toFixed(2)}</p>
           <p className="text-sm flex items-center mt-2 text-green-300">
@@ -49,7 +50,7 @@ const FinanceiroTab: React.FC = () => {
           </p>
         </Card>
         
-        <Card className="bg-gradient-to-r from-acai-700 to-acai-800 p-4">
+        <Card className="bg-gradient-to-r from-acai-700 to-acai-800 p-4 shadow-lg">
           <h3 className="text-sm md:text-base font-medium">Despesas Totais</h3>
           <p className="text-xl md:text-2xl font-bold mt-3">R$ {totalDespesas.toFixed(2)}</p>
           <p className="text-sm flex items-center mt-2 text-red-300">
@@ -58,7 +59,7 @@ const FinanceiroTab: React.FC = () => {
           </p>
         </Card>
         
-        <Card className="bg-gradient-to-r from-acai-400 to-acai-300 p-4">
+        <Card className="bg-gradient-to-r from-acai-400 to-acai-300 p-4 shadow-lg">
           <h3 className="text-sm md:text-base font-medium">Lucro Período</h3>
           <p className="text-xl md:text-2xl font-bold mt-3">R$ {lucroTotal.toFixed(2)}</p>
           <p className="text-sm flex items-center mt-2 text-green-300">
@@ -71,7 +72,7 @@ const FinanceiroTab: React.FC = () => {
       {/* Gráficos */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Gráfico de Receitas e Despesas */}
-        <Card className="bg-acai-800 bg-opacity-30 p-4">
+        <Card className="bg-acai-800 bg-opacity-30 p-4 shadow-lg backdrop-blur-sm">
           <h3 className="text-base md:text-lg font-bold mb-3">Receitas e Despesas</h3>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
@@ -94,50 +95,89 @@ const FinanceiroTab: React.FC = () => {
                   contentStyle={{ backgroundColor: '#1A1A1A', borderColor: '#333' }}
                   formatter={(value) => [`R$ ${value}`, '']} 
                 />
-                <Line type="monotone" dataKey="receita" stroke="#7B2CBF" strokeWidth={2} activeDot={{ r: 8 }} />
-                <Line type="monotone" dataKey="despesa" stroke="#FF6B6B" strokeWidth={2} />
+                <Line 
+                  type="monotone" 
+                  dataKey="receita" 
+                  stroke="#9b87f5" 
+                  strokeWidth={2} 
+                  activeDot={{ r: 8 }} 
+                  dot={{ r: 4, fill: "#9b87f5", strokeWidth: 0 }}
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="despesa" 
+                  stroke="#FF6B6B" 
+                  strokeWidth={2} 
+                  dot={{ r: 4, fill: "#FF6B6B", strokeWidth: 0 }}
+                />
               </LineChart>
             </ResponsiveContainer>
           </div>
         </Card>
         
         {/* Gráfico de Distribuição de Despesas */}
-        <Card className="bg-acai-800 bg-opacity-30 p-4">
-          <h3 className="text-base md:text-lg font-bold mb-3">Distribuição de Despesas</h3>
+        <Card className="bg-acai-900 bg-opacity-70 p-4 shadow-lg backdrop-blur-sm border border-acai-700">
+          <h3 className="text-base md:text-lg font-bold mb-4">Distribuição de Despesas</h3>
           <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
+            <ChartContainer
+              config={{
+                insumos: { color: '#9b87f5', label: 'Insumos' },
+                funcionarios: { color: '#7E69AB', label: 'Funcionários' },
+                aluguel: { color: '#6E59A5', label: 'Aluguel' },
+                marketing: { color: '#8B5CF6', label: 'Marketing' },
+                outros: { color: '#D6BCFA', label: 'Outros' },
+              }}
+            >
               <PieChart>
                 <Pie
                   data={distribuicaoDespesas}
                   cx="50%"
                   cy="50%"
-                  innerRadius={isMobile ? 40 : 60}
-                  outerRadius={isMobile ? 80 : 90}
-                  paddingAngle={2}
+                  innerRadius={isMobile ? 50 : 70}
+                  outerRadius={isMobile ? 80 : 100}
+                  paddingAngle={3}
                   dataKey="valor"
-                  label={({ categoria, percent }) => `${categoria} ${(percent * 100).toFixed(0)}%`}
                   labelLine={false}
+                  label={({ categoria, valor, x, y }) => {
+                    return (
+                      <text
+                        x={x}
+                        y={y}
+                        fill="white"
+                        textAnchor={x > 200 ? 'start' : 'end'}
+                        dominantBaseline="central"
+                        fontSize={12}
+                        fontWeight={500}
+                      >
+                        {`${categoria} ${valor}%`}
+                      </text>
+                    );
+                  }}
                 >
                   {distribuicaoDespesas.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    <Cell 
+                      key={`cell-${index}`} 
+                      fill={COLORS[index % COLORS.length]} 
+                      stroke="#10002b" 
+                      strokeWidth={2}
+                    />
                   ))}
                 </Pie>
                 <Tooltip 
-                  formatter={(value) => [`${value}%`, 'Porcentagem']} 
-                  contentStyle={{ backgroundColor: '#1A1A1A', borderColor: '#333' }}
+                  content={<ChartTooltipContent />}
                 />
               </PieChart>
-            </ResponsiveContainer>
+            </ChartContainer>
           </div>
           
-          <div className="flex flex-wrap justify-center mt-3 gap-2">
+          <div className="flex flex-wrap justify-center mt-5 gap-2">
             {distribuicaoDespesas.map((entry, index) => (
-              <div key={index} className="flex items-center text-xs">
+              <div key={index} className="flex items-center text-xs rounded-full bg-acai-800 px-3 py-1 shadow-md">
                 <div 
-                  className="w-3 h-3 mr-1" 
+                  className="w-3 h-3 mr-2 rounded-full" 
                   style={{ backgroundColor: COLORS[index % COLORS.length] }}
                 ></div>
-                <span>{entry.categoria} ({entry.valor}%)</span>
+                <span className="whitespace-nowrap">{entry.categoria} ({entry.valor}%)</span>
               </div>
             ))}
           </div>
@@ -145,7 +185,7 @@ const FinanceiroTab: React.FC = () => {
       </div>
       
       {/* Tabela de movimentações financeiras */}
-      <Card className="p-4">
+      <Card className="p-4 shadow-lg">
         <h3 className="text-base md:text-lg font-bold mb-3">Últimas Movimentações</h3>
         <div className="overflow-x-auto">
           <Table>
