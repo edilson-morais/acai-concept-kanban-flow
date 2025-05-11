@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Settings, Printer, Package } from "lucide-react";
+import { Lock, Printer, Package } from "lucide-react";
 import ProdutosConfig from '../components/configuracoes/ProdutosConfig';
 import ImpressaoConfig from '../components/configuracoes/ImpressaoConfig';
 
