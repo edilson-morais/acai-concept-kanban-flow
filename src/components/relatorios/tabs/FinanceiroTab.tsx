@@ -31,6 +31,15 @@ const distribuicaoDespesas = [
 // Cores mais vibrantes para o gráfico
 const COLORS = ['#8B5CF6', '#7B2CBF', '#6E59A5', '#C77DFF', '#D6BCFA'];
 
+// Função para formatar valores monetários no estilo brasileiro
+const formatCurrency = (value: number): string => {
+  return value.toLocaleString('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+    minimumFractionDigits: 2,
+  });
+};
+
 const FinanceiroTab: React.FC = () => {
   const isMobile = useIsMobile();
   
@@ -45,7 +54,7 @@ const FinanceiroTab: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="bg-gradient-to-r from-acai-500 to-acai-600 p-4 shadow-lg">
           <h3 className="text-sm md:text-base font-medium text-white">Receita Total</h3>
-          <p className="text-xl md:text-2xl font-bold mt-3 text-white">R$ {totalReceitas.toFixed(2)}</p>
+          <p className="text-xl md:text-2xl font-bold mt-3 text-white">{formatCurrency(totalReceitas)}</p>
           <p className="text-sm flex items-center mt-2 text-green-300">
             <ArrowUp className="h-4 w-4 mr-1" />
             8% vs período anterior
@@ -54,7 +63,7 @@ const FinanceiroTab: React.FC = () => {
         
         <Card className="bg-gradient-to-r from-acai-700 to-acai-800 p-4 shadow-lg">
           <h3 className="text-sm md:text-base font-medium text-white">Despesas Totais</h3>
-          <p className="text-xl md:text-2xl font-bold mt-3 text-white">R$ {totalDespesas.toFixed(2)}</p>
+          <p className="text-xl md:text-2xl font-bold mt-3 text-white">{formatCurrency(totalDespesas)}</p>
           <p className="text-sm flex items-center mt-2 text-red-300">
             <ArrowDown className="h-4 w-4 mr-1" />
             5% vs período anterior
@@ -63,7 +72,7 @@ const FinanceiroTab: React.FC = () => {
         
         <Card className="bg-gradient-to-r from-acai-400 to-acai-300 p-4 shadow-lg">
           <h3 className="text-sm md:text-base font-medium text-white">Lucro Período</h3>
-          <p className="text-xl md:text-2xl font-bold mt-3 text-white">R$ {lucroTotal.toFixed(2)}</p>
+          <p className="text-xl md:text-2xl font-bold mt-3 text-white">{formatCurrency(lucroTotal)}</p>
           <p className="text-sm flex items-center mt-2 text-green-300">
             <ArrowUp className="h-4 w-4 mr-1" />
             12% vs período anterior
@@ -217,10 +226,10 @@ const FinanceiroTab: React.FC = () => {
                     {index % 2 === 0 ? 'Vendas do dia' : 'Pagamento de insumos'}
                   </TableCell>
                   <TableCell className="text-right text-green-300">
-                    {index % 2 === 0 ? `R$ ${item.receita.toFixed(2)}` : '-'}
+                    {index % 2 === 0 ? formatCurrency(item.receita) : '-'}
                   </TableCell>
                   <TableCell className="text-right text-red-300">
-                    {index % 2 === 1 ? `R$ ${item.despesa.toFixed(2)}` : '-'}
+                    {index % 2 === 1 ? formatCurrency(item.despesa) : '-'}
                   </TableCell>
                 </TableRow>
               ))}

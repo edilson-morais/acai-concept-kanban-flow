@@ -11,17 +11,25 @@ import ClientesTab from '../components/relatorios/tabs/ClientesTab';
 import FinanceiroTab from '../components/relatorios/tabs/FinanceiroTab';
 import { TabsContent } from "@/components/ui/tabs";
 
+const formatCurrency = (value: number): string => {
+  return value.toLocaleString('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+    minimumFractionDigits: 2,
+  });
+};
+
 const Relatorios = () => {
   const [dataInicial, setDataInicial] = useState('2025-05-01');
   const [dataFinal, setDataFinal] = useState('2025-05-08');
   const [tabAtiva, setTabAtiva] = useState('vendas');
 
-  // Dados para os cards de resumo
+  // Dados para os cards de resumo com formato de moeda brasileiro
   const salesData = {
-    totalSales: 'R$ 9.780,00',
-    averageTicket: 'R$ 32,60',
+    totalSales: formatCurrency(9780),
+    averageTicket: formatCurrency(32.6),
     orderCount: '300',
-    dailySales: 'R$ 1.450,00',
+    dailySales: formatCurrency(1450),
     totalSalesChange: '12% vs período anterior',
     averageTicketChange: '4% vs período anterior',
     orderCountChange: '8% vs período anterior',
