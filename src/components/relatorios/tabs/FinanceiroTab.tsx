@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card } from "@/components/ui/card";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, PieChart, Pie, Cell } from 'recharts';
@@ -122,7 +123,7 @@ const FinanceiroTab: React.FC = () => {
         {/* Gráfico de Distribuição de Despesas com visual melhorado */}
         <Card className="bg-acai-900 bg-opacity-70 p-4 shadow-lg backdrop-blur-sm border border-acai-700">
           <h3 className="text-base md:text-lg font-bold mb-4 text-white">Distribuição de Despesas</h3>
-          <div className="h-64">
+          <div className="h-64 mt-4 pb-8"> {/* Added mt-4 for top margin and pb-8 for padding at bottom */}
             <ChartContainer
               config={{
                 insumos: { color: '#8B5CF6', label: 'Insumos' },
@@ -132,11 +133,11 @@ const FinanceiroTab: React.FC = () => {
                 outros: { color: '#D6BCFA', label: 'Outros' },
               }}
             >
-              <PieChart>
+              <PieChart margin={{ top: 0, right: 0, bottom: 25, left: 0 }}> {/* Added bottom margin to push chart up */}
                 <Pie
                   data={distribuicaoDespesas}
                   cx="50%"
-                  cy="50%"
+                  cy="45%" /* Changed from 50% to 45% to move chart up */
                   innerRadius={isMobile ? 55 : 75}
                   outerRadius={isMobile ? 85 : 105}
                   paddingAngle={4}
@@ -175,8 +176,8 @@ const FinanceiroTab: React.FC = () => {
             </ChartContainer>
           </div>
           
-          {/* Legenda melhorada com estilo de pílula */}
-          <div className="flex flex-wrap justify-center mt-5 gap-3">
+          {/* Legenda melhorada com estilo de pílula - moved further down */}
+          <div className="flex flex-wrap justify-center mt-2 gap-3"> {/* Changed mt-5 to mt-2 */}
             {distribuicaoDespesas.map((entry, index) => (
               <div 
                 key={index} 

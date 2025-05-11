@@ -4,6 +4,12 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { FileText, Download, FileSpreadsheet } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import { 
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const ExportOptions: React.FC = () => {
   const { toast } = useToast();
@@ -21,30 +27,59 @@ const ExportOptions: React.FC = () => {
       <div className="p-4">
         <h3 className="text-base md:text-lg font-bold mb-3 text-white">Exportar Relatório</h3>
         <div className="flex flex-wrap gap-2">
-          <Button 
-            variant="default" 
-            className="bg-acai-500 hover:bg-acai-600 transition-colors shadow-md"
-            onClick={() => handleExport('PDF')}
-          >
-            <FileText className="mr-1 h-4 w-4" />
-            PDF
-          </Button>
-          <Button 
-            variant="outline"
-            className="border-acai-400 text-white hover:bg-acai-400 hover:text-white transition-colors shadow-md"
-            onClick={() => handleExport('Excel')}
-          >
-            <FileSpreadsheet className="mr-1 h-4 w-4" />
-            Excel
-          </Button>
-          <Button 
-            variant="outline"
-            className="border-acai-400 text-white hover:bg-acai-400 hover:text-white transition-colors shadow-md"
-            onClick={() => handleExport('CSV')}
-          >
-            <Download className="mr-1 h-4 w-4" />
-            CSV
-          </Button>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button 
+                  variant="default" 
+                  className="bg-acai-500 hover:bg-acai-600 transition-colors shadow-md"
+                  onClick={() => handleExport('PDF')}
+                >
+                  <FileText className="mr-1 h-4 w-4" />
+                  PDF
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Exportar como documento PDF</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button 
+                  variant="outline"
+                  className="border-acai-400 text-white hover:bg-acai-400 hover:text-white transition-colors shadow-md"
+                  onClick={() => handleExport('Excel')}
+                >
+                  <FileSpreadsheet className="mr-1 h-4 w-4" />
+                  Excel
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Exportar como planilha Excel</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button 
+                  variant="outline"
+                  className="border-acai-400 text-white hover:bg-acai-400 hover:text-white transition-colors shadow-md"
+                  onClick={() => handleExport('CSV')}
+                >
+                  <Download className="mr-1 h-4 w-4" />
+                  CSV
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Exportar como arquivo CSV</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
       </div>
     </Card>
