@@ -6,10 +6,12 @@ import ChartPanel from './ChartPanel';
 import { Order } from '../types';
 import { toast } from 'sonner';
 import { supabase } from "../integrations/supabase/client";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const DashboardContent = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const isMobile = useIsMobile();
 
   // Dados para os gráficos (ainda mockados por simplicidade)
   const hourlyData = [
@@ -205,8 +207,8 @@ const DashboardContent = () => {
   const completedOrders = orders.filter(order => order.status === 'completed');
 
   return (
-    <main className="flex-1 overflow-y-auto p-6">
-      <div className="flex flex-col gap-5">
+    <main className="flex-1 overflow-y-auto p-3 md:p-6">
+      <div className="flex flex-col gap-3 md:gap-5">
         <div className="w-full">
           <StatCards 
             newOrdersCount={newOrders.length} 
@@ -215,7 +217,7 @@ const DashboardContent = () => {
             completedOrdersCount={completedOrders.length} 
           />
           
-          <div className="mt-5 h-[calc(100vh-400px)]">
+          <div className={`mt-3 md:mt-5 ${isMobile ? 'h-[50vh]' : 'h-[calc(100vh-400px)]'}`}>
             <KanbanBoard 
               newOrders={newOrders}
               preparingOrders={preparingOrders}
@@ -229,7 +231,7 @@ const DashboardContent = () => {
           </div>
         </div>
         
-        <div className="w-full mt-5 h-96">
+        <div className="w-full mt-3 md:mt-5 h-64 md:h-96">
           <ChartPanel 
             hourlyData={hourlyData} 
             topSellingItems={topSellingItems} 

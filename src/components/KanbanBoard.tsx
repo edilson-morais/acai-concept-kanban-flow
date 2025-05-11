@@ -2,6 +2,7 @@
 import React from 'react';
 import KanbanColumn from './KanbanColumn';
 import { Order } from '../types';
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface KanbanBoardProps {
   newOrders: Order[];
@@ -24,12 +25,14 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
   onNewOrder,
   isLoading = false
 }) => {
+  const isMobile = useIsMobile();
+
   return (
     <>
       {/* Kanban Header */}
-      <div className="bg-acai-900 rounded-md mb-4 py-3 px-4 flex justify-between items-center">
-        <h2 className="font-bold text-lg">Pedidos</h2>
-        <button onClick={onNewOrder} className="bg-acai-500 hover:bg-acai-600 px-4 py-1.5 rounded-full text-sm text-white transition-all">
+      <div className="bg-acai-900 rounded-md mb-2 md:mb-4 py-2 md:py-3 px-2 md:px-4 flex justify-between items-center">
+        <h2 className="font-bold text-base md:text-lg">Pedidos</h2>
+        <button onClick={onNewOrder} className="bg-acai-500 hover:bg-acai-600 px-3 md:px-4 py-1 md:py-1.5 rounded-full text-xs md:text-sm text-white transition-all">
           + Novo Pedido
         </button>
       </div>
@@ -43,7 +46,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
       
       {/* Kanban Board */}
       {!isLoading && (
-        <div className="flex space-x-5 h-[calc(100%-60px)] pb-5 overflow-x-auto">
+        <div className={`flex ${isMobile ? 'flex-col' : 'flex-row space-x-5'} h-[calc(100%-60px)] ${isMobile ? 'space-y-4 pb-4' : 'pb-5'} overflow-x-auto overflow-y-auto`}>
           <KanbanColumn 
             title="Novos Pedidos" 
             orders={newOrders} 

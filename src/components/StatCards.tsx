@@ -16,7 +16,7 @@ const StatCards: React.FC<StatCardsProps> = ({
   completedOrdersCount 
 }) => {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-6 mb-3 md:mb-6">
       <StatCard 
         title="Novos Pedidos" 
         value={newOrdersCount} 
