@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FileText, Download } from "lucide-react";
+import { FileText, Download, FileSpreadsheet } from "lucide-react";
 
 const ExportOptions: React.FC = () => {
   return (
@@ -15,7 +15,7 @@ const ExportOptions: React.FC = () => {
             PDF
           </Button>
           <Button variant="outline">
-            <Download className="mr-1 h-4 w-4" />
+            <FileSpreadsheet className="mr-1 h-4 w-4" />
             Excel
           </Button>
           <Button variant="outline">
