@@ -215,7 +215,7 @@ const DashboardContent = () => {
             completedOrdersCount={completedOrders.length} 
           />
           
-          <div className="mt-5 h-[calc(100vh-350px)]">
+          <div className="mt-5 h-[calc(100vh-400px)]">
             <KanbanBoard 
               newOrders={newOrders}
               preparingOrders={preparingOrders}
@@ -229,7 +229,7 @@ const DashboardContent = () => {
           </div>
         </div>
         
-        <div className="w-full mt-5 h-64">
+        <div className="w-full mt-5 h-96">
           <ChartPanel 
             hourlyData={hourlyData} 
             topSellingItems={topSellingItems} 
