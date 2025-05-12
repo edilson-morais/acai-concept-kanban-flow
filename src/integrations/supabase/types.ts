@@ -9,6 +9,39 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      acai_categories: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          has_extra_cost: boolean | null
+          id: string
+          is_premium: boolean | null
+          name: string
+          unlimited: boolean | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          has_extra_cost?: boolean | null
+          id?: string
+          is_premium?: boolean | null
+          name: string
+          unlimited?: boolean | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          has_extra_cost?: boolean | null
+          id?: string
+          is_premium?: boolean | null
+          name?: string
+          unlimited?: boolean | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       acai_concept_dashboard_lovable01: {
         Row: {
           created_at: string
@@ -39,6 +72,39 @@ export type Database = {
           status?: string
           total_price?: number
           updated_at?: string
+        }
+        Relationships: []
+      }
+      acai_products: {
+        Row: {
+          available: boolean | null
+          category: string
+          created_at: string | null
+          description: string | null
+          id: string
+          name: string
+          price: number
+          updated_at: string | null
+        }
+        Insert: {
+          available?: boolean | null
+          category: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          price: number
+          updated_at?: string | null
+        }
+        Update: {
+          available?: boolean | null
+          category?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          price?: number
+          updated_at?: string | null
         }
         Relationships: []
       }
