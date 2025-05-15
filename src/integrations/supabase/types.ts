@@ -9,7 +9,43 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      posts_agendados: {
+      adriana_producoes: {
+        Row: {
+          data_atualizacao: string
+          data_criacao: string
+          descricao: string | null
+          id: string
+          legenda_gpt: string | null
+          status: string
+          titulo: string
+          url_imagem: string | null
+          url_video: string | null
+        }
+        Insert: {
+          data_atualizacao?: string
+          data_criacao?: string
+          descricao?: string | null
+          id?: string
+          legenda_gpt?: string | null
+          status?: string
+          titulo: string
+          url_imagem?: string | null
+          url_video?: string | null
+        }
+        Update: {
+          data_atualizacao?: string
+          data_criacao?: string
+          descricao?: string | null
+          id?: string
+          legenda_gpt?: string | null
+          status?: string
+          titulo?: string
+          url_imagem?: string | null
+          url_video?: string | null
+        }
+        Relationships: []
+      }
+      "posts_agendados-dash": {
         Row: {
           criado_em: string | null
           data_agendada: string | null
