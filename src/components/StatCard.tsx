@@ -6,6 +6,8 @@ interface StatCardProps {
   value: number | string;
   gradient: string;
   isCurrency?: boolean;
+  change?: string;
+  isPositive?: boolean;
 }
 
 const formatCurrency = (value: number | string): string => {
@@ -23,13 +25,21 @@ const formatCurrency = (value: number | string): string => {
   });
 };
 
-const StatCard: React.FC<StatCardProps> = ({ title, value, gradient, isCurrency = false }) => {
+const StatCard: React.FC<StatCardProps> = ({ title, value, gradient, isCurrency = false, change, isPositive }) => {
   const displayValue = isCurrency ? formatCurrency(value) : value;
   
   return (
-    <div className={`rounded-lg p-5 ${gradient} shadow-lg`}>
-      <h3 className="text-sm font-medium text-white mb-5">{title}</h3>
-      <p className="text-3xl font-bold text-white">{displayValue}</p>
+    <div className={`rounded-md p-4 ${gradient}`}>
+      <div className="flex flex-col">
+        <h3 className="text-xs font-medium text-gray-400 mb-2">{title}</h3>
+        <p className="text-xl font-semibold text-white mb-1">{displayValue}</p>
+        {change && (
+          <div className={`text-xs font-medium ${isPositive ? 'text-green-400' : 'text-red-400'} flex items-center`}>
+            <span>{isPositive ? '↑' : '↓'}</span>
+            <span className="ml-1">{change}</span>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

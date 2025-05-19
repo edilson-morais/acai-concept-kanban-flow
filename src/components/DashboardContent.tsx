@@ -68,32 +68,7 @@ const DashboardContent = () => {
   const fetchOrders = async () => {
     setIsLoading(true);
     try {
-      // Verificar se existe a tabela no Supabase usando as tabelas existentes
-      let hasTable = false;
-      try {
-        // Tentamos verificar se podemos obter dados de uma tabela existente
-        const { data: existingTableData } = await supabase
-          .from('adriana_producoes')
-          .select('count')
-          .limit(1)
-          .maybeSingle();
-          
-        hasTable = existingTableData !== null;
-      } catch (error) {
-        console.log('Erro ao verificar tabela existente:', error);
-        hasTable = false;
-      }
-
-      if (!hasTable) {
-        // Se não encontrar tabela válida, usar dados de exemplo
-        setOrders(exemploOrders);
-        setIsLoading(false);
-        console.log('Usando dados de exemplo para o dashboard');
-        return;
-      }
-
-      // Se chegou aqui, significa que pode haver uma tabela personalizada
-      // mas como não temos acesso a ela nos tipos, usamos dados de exemplo
+      // Usar dados de exemplo
       setOrders(exemploOrders);
       setIsLoading(false);
     } catch (error) {
@@ -107,27 +82,6 @@ const DashboardContent = () => {
 
   useEffect(() => {
     fetchOrders();
-    
-    // Configurar atualização em tempo real
-    const channel = supabase
-      .channel('acai_orders_changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          // Usamos qualquer tabela existente para o canal
-          table: 'adriana_producoes'
-        },
-        () => {
-          fetchOrders();
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
   }, []);
 
   // Handler para mover o pedido para o próximo status
@@ -207,35 +161,207 @@ const DashboardContent = () => {
   const completedOrders = orders.filter(order => order.status === 'completed');
 
   return (
-    <main className="flex-1 overflow-y-auto p-3 md:p-6">
-      <div className="flex flex-col gap-3 md:gap-5">
-        <div className="w-full">
-          <StatCards 
-            newOrdersCount={newOrders.length} 
-            totalOrdersCount={orders.length} 
-            preparingOrdersCount={preparingOrders.length} 
-            completedOrdersCount={completedOrders.length} 
-          />
+    <main className="flex-1 overflow-y-auto">
+      <div className="flex flex-col gap-4">
+        {/* Seção de Campanhas Publicadas */}
+        <div className="w-full bg-[#0d0d0d] rounded-lg overflow-hidden border border-gray-800">
+          <div className="bg-[#060606] p-3 border-b border-gray-800">
+            <h2 className="text-white text-lg font-medium">Campanhas Publicadas</h2>
+          </div>
           
-          <div className={`mt-3 md:mt-5 ${isMobile ? 'h-[50vh]' : 'h-[calc(100vh-400px)]'}`}>
-            <KanbanBoard 
-              newOrders={newOrders}
-              preparingOrders={preparingOrders}
-              readyOrders={readyOrders}
-              completedOrders={completedOrders}
-              onMoveOrder={handleMoveOrder}
-              onMoveBackOrder={handleMoveBackOrder}
-              onNewOrder={handleNewOrder}
-              isLoading={isLoading}
-            />
+          <div className="p-0">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-[#111]">
+                    <th className="py-2 px-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider border-b border-gray-800">#</th>
+                    <th className="py-2 px-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider border-b border-gray-800">Campanha</th>
+                    <th className="py-2 px-3 text-right text-xs font-medium text-cyan-400 uppercase tracking-wider border-b border-gray-800">Alcance</th>
+                    <th className="py-2 px-3 text-right text-xs font-medium text-blue-400 uppercase tracking-wider border-b border-gray-800">Impressões</th>
+                    <th className="py-2 px-3 text-right text-xs font-medium text-green-400 uppercase tracking-wider border-b border-gray-800">Cliques</th>
+                    <th className="py-2 px-3 text-right text-xs font-medium text-purple-400 uppercase tracking-wider border-b border-gray-800">Mensagens</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[1, 2, 3, 4, 5].map((item) => (
+                    <tr key={item} className="border-b border-gray-800 hover:bg-[#0a0a0a]">
+                      <td className="py-3 px-3 text-gray-300 text-left">{item}</td>
+                      <td className="py-3 px-3 text-gray-300 text-left">Campanha {item} - Açaí Premium</td>
+                      <td className="py-3 px-3 text-cyan-400 text-right">{Math.floor(Math.random() * 50000) + 10000}</td>
+                      <td className="py-3 px-3 text-blue-400 text-right">{Math.floor(Math.random() * 30000) + 20000}</td>
+                      <td className="py-3 px-3 text-green-400 text-right">{Math.floor(Math.random() * 500) + 50}</td>
+                      <td className="py-3 px-3 text-purple-400 text-right">{Math.floor(Math.random() * 100) + 10}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
         
-        <div className="w-full mt-3 md:mt-5 h-64 md:h-96">
-          <ChartPanel 
-            hourlyData={hourlyData} 
-            topSellingItems={topSellingItems} 
-          />
+        {/* Seção de Visão Geral */}
+        <div className="w-full">
+          <div className="bg-[#0d0d0d] rounded-lg overflow-hidden border border-gray-800 mb-4">
+            <div className="bg-[#060606] p-3 border-b border-gray-800">
+              <h2 className="text-white text-lg font-medium">Visão Geral | Principais Métricas</h2>
+            </div>
+            <div className="p-4">
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+                <StatCard 
+                  title="Valor Investido" 
+                  value="R$ 3.290,46" 
+                  gradient="bg-[#111] border border-gray-800" 
+                />
+                <StatCard 
+                  title="Alcance" 
+                  value="417.373" 
+                  gradient="bg-[#111] border border-gray-800" 
+                />
+                <StatCard 
+                  title="Impressões" 
+                  value="475.408" 
+                  gradient="bg-[#111] border border-gray-800" 
+                />
+                <StatCard 
+                  title="CPM" 
+                  value="8,06" 
+                  gradient="bg-[#111] border border-gray-800" 
+                />
+                <StatCard 
+                  title="Cliques" 
+                  value="4.093" 
+                  gradient="bg-[#111] border border-gray-800" 
+                />
+                <StatCard 
+                  title="Mensagens" 
+                  value="1.184" 
+                  gradient="bg-[#111] border border-gray-800" 
+                />
+                <StatCard 
+                  title="Custo por mensagem" 
+                  value="R$ 3,56" 
+                  gradient="bg-[#111] border border-gray-800" 
+                />
+                <StatCard 
+                  title="CPC" 
+                  value="R$ 1,80" 
+                  gradient="bg-[#111] border border-gray-800" 
+                />
+                <StatCard 
+                  title="CTR" 
+                  value="0,97%" 
+                  gradient="bg-[#111] border border-gray-800" 
+                />
+                <StatCard 
+                  title="Taxa de mensagens" 
+                  value="77,79%" 
+                  gradient="bg-[#111] border border-gray-800" 
+                />
+              </div>
+            </div>
+          </div>
+          
+          {/* Gráficos e Kanban */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div className="bg-[#0d0d0d] rounded-lg overflow-hidden border border-gray-800">
+              <div className="bg-[#060606] p-3 border-b border-gray-800">
+                <h2 className="text-white text-lg font-medium">Maiores Taxas de Envio de Mensagens</h2>
+              </div>
+              <div className="p-4 h-64">
+                <ChartPanel 
+                  hourlyData={hourlyData} 
+                  topSellingItems={topSellingItems} 
+                />
+              </div>
+            </div>
+            
+            <div className="bg-[#0d0d0d] rounded-lg overflow-hidden border border-gray-800">
+              <div className="bg-[#060606] p-3 border-b border-gray-800">
+                <h2 className="text-white text-lg font-medium">Melhores CPL's</h2>
+              </div>
+              <div className="p-4 h-64 overflow-y-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="bg-[#111]">
+                      <th className="py-2 px-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Campanha</th>
+                      <th className="py-2 px-3 text-right text-xs font-medium text-gray-400 uppercase tracking-wider">Custo por Lead</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {[1, 2, 3, 4, 5, 6].map((item) => (
+                      <tr key={item} className="border-b border-gray-800 hover:bg-[#0a0a0a]">
+                        <td className="py-2 px-3 text-gray-300 text-left">Campanha {item} - Açaí Premium</td>
+                        <td className="py-2 px-3 text-gray-300 text-right">R$ {(Math.random() * 5 + 1).toFixed(2)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          
+          {/* Terceira linha de gráficos */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div className="bg-[#0d0d0d] rounded-lg overflow-hidden border border-gray-800">
+              <div className="bg-[#060606] p-3 border-b border-gray-800">
+                <h2 className="text-white text-lg font-medium">Funil de Tráfego</h2>
+              </div>
+              <div className="p-4 h-64 flex items-center justify-center">
+                <div className="w-full max-w-xs mx-auto">
+                  <div className="bg-blue-600 text-white p-2 text-center mb-1 rounded-t-lg">Impressões: 475.408</div>
+                  <div className="bg-blue-500 text-white p-2 text-center mb-1" style={{width: '90%', marginLeft: '5%'}}>Alcance: 417.373</div>
+                  <div className="bg-blue-400 text-white p-2 text-center mb-1" style={{width: '80%', marginLeft: '10%'}}>Cliques: 4.093</div>
+                  <div className="bg-blue-300 text-white p-2 text-center rounded-b-lg" style={{width: '70%', marginLeft: '15%'}}>Mensagens: 1.184</div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="bg-[#0d0d0d] rounded-lg overflow-hidden border border-gray-800">
+              <div className="bg-[#060606] p-3 border-b border-gray-800">
+                <h2 className="text-white text-lg font-medium">Campanhas com Maior Investimento</h2>
+              </div>
+              <div className="p-4 h-64">
+                <ChartPanel 
+                  hourlyData={hourlyData} 
+                  topSellingItems={topSellingItems} 
+                />
+              </div>
+            </div>
+          </div>
+          
+          {/* Última seção */}
+          <div className="w-full bg-[#0d0d0d] rounded-lg overflow-hidden border border-gray-800">
+            <div className="bg-[#060606] p-3 border-b border-gray-800">
+              <h2 className="text-white text-lg font-medium">Criativos Validados</h2>
+            </div>
+            
+            <div className="p-0">
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="bg-[#111]">
+                      <th className="py-2 px-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider border-b border-gray-800">#</th>
+                      <th className="py-2 px-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider border-b border-gray-800">Ad Name</th>
+                      <th className="py-2 px-3 text-right text-xs font-medium text-cyan-400 uppercase tracking-wider border-b border-gray-800">Alcance</th>
+                      <th className="py-2 px-3 text-right text-xs font-medium text-green-400 uppercase tracking-wider border-b border-gray-800">Cliques</th>
+                      <th className="py-2 px-3 text-right text-xs font-medium text-purple-400 uppercase tracking-wider border-b border-gray-800">Mensagens</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {[1, 2, 3, 4, 5, 6].map((item) => (
+                      <tr key={item} className="border-b border-gray-800 hover:bg-[#0a0a0a]">
+                        <td className="py-3 px-3 text-gray-300 text-left">{item}</td>
+                        <td className="py-3 px-3 text-gray-300 text-left">Ad {item} - Açaí Premium</td>
+                        <td className="py-3 px-3 text-cyan-400 text-right">{Math.floor(Math.random() * 30000) + 5000}</td>
+                        <td className="py-3 px-3 text-green-400 text-right">{Math.floor(Math.random() * 500) + 100}</td>
+                        <td className="py-3 px-3 text-purple-400 text-right">{Math.floor(Math.random() * 100) + 10}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </main>

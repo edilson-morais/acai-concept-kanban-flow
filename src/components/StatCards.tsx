@@ -16,26 +16,26 @@ const StatCards: React.FC<StatCardsProps> = ({
   completedOrdersCount 
 }) => {
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-6 mb-3 md:mb-6">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-4 mb-4">
       <StatCard 
         title="Novos Pedidos" 
         value={newOrdersCount} 
-        gradient="bg-gradient-to-r from-acai-500 to-acai-600" 
+        gradient="bg-[#111] border border-gray-800" 
       />
       <StatCard 
         title="Pedidos do Dia" 
         value={totalOrdersCount} 
-        gradient="bg-gradient-to-r from-acai-700 to-acai-800" 
+        gradient="bg-[#111] border border-gray-800" 
       />
       <StatCard 
         title="Em Preparo" 
         value={preparingOrdersCount} 
-        gradient="bg-gradient-to-r from-acai-600 to-acai-500" 
+        gradient="bg-[#111] border border-gray-800" 
       />
       <StatCard 
         title="Concluídos" 
         value={completedOrdersCount} 
-        gradient="bg-gradient-to-r from-acai-400 to-acai-300" 
+        gradient="bg-[#111] border border-gray-800" 
       />
     </div>
   );
