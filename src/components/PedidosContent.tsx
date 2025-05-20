@@ -6,7 +6,9 @@ import { Button } from "./ui/button";
 import { toast } from 'sonner';
 import { supabase } from "../integrations/supabase/client";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Search, Edit, Trash2, Plus } from 'lucide-react';
+import { Search, Edit, Trash2, Plus, Filter, Clock, ChevronDown, ArrowDownUp } from 'lucide-react';
+import KanbanBoard from './KanbanBoard';
+import { Order } from '@/types';
 
 interface Pedido {
   id: string;
@@ -21,6 +23,7 @@ const PedidosContent = () => {
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [searchTerm, setSearchTerm] = useState<string>('');
+  const [viewMode, setViewMode] = useState<'list' | 'kanban'>('list');
   const isMobile = useIsMobile();
 
   // Exemplo de pedidos para manter funcionalidade
@@ -140,11 +143,11 @@ const PedidosContent = () => {
 
   const getStatusColor = (status: string) => {
     switch(status) {
-      case 'new': return 'bg-blue-500';
-      case 'preparing': return 'bg-yellow-500';
-      case 'ready': return 'bg-green-500';
-      case 'completed': return 'bg-purple-500';
-      default: return 'bg-gray-500';
+      case 'new': return 'bg-gradient-to-r from-blue-500 to-blue-600';
+      case 'preparing': return 'bg-gradient-to-r from-yellow-500 to-yellow-600';
+      case 'ready': return 'bg-gradient-to-r from-green-500 to-green-600';
+      case 'completed': return 'bg-gradient-to-r from-purple-500 to-purple-600';
+      default: return 'bg-gradient-to-r from-gray-500 to-gray-600';
     }
   };
 
@@ -164,99 +167,210 @@ const PedidosContent = () => {
     pedido.id.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  // Convert Pedidos to Orders for Kanban view
+  const convertToOrders = (pedidos: Pedido[]): Order[] => {
+    return pedidos.map(pedido => ({
+      id: pedido.id,
+      customerName: pedido.customer_name,
+      items: pedido.items.map(item => `${item.quantity}x ${item.name}`),
+      phone: pedido.phone,
+      status: pedido.status,
+      time: formatDate(pedido.created_at)
+    }));
+  };
+
+  const newOrders = convertToOrders(filteredPedidos.filter(p => p.status === 'new'));
+  const preparingOrders = convertToOrders(filteredPedidos.filter(p => p.status === 'preparing'));
+  const readyOrders = convertToOrders(filteredPedidos.filter(p => p.status === 'ready'));
+  const completedOrders = convertToOrders(filteredPedidos.filter(p => p.status === 'completed'));
+
+  const handleMoveOrder = (id: string, currentStatus: string) => {
+    const newStatus = 
+      currentStatus === 'new' ? 'preparing' :
+      currentStatus === 'preparing' ? 'ready' :
+      currentStatus === 'ready' ? 'completed' : 'completed';
+
+    setPedidos(prevPedidos => prevPedidos.map(pedido => 
+      pedido.id === id ? {...pedido, status: newStatus as 'new' | 'preparing' | 'ready' | 'completed'} : pedido
+    ));
+    toast.success(`Pedido movido para ${getStatusName(newStatus)}`);
+  };
+
+  const handleMoveBackOrder = (id: string, currentStatus: string) => {
+    const newStatus = 
+      currentStatus === 'preparing' ? 'new' :
+      currentStatus === 'ready' ? 'preparing' :
+      currentStatus === 'completed' ? 'ready' : 'new';
+
+    setPedidos(prevPedidos => prevPedidos.map(pedido => 
+      pedido.id === id ? {...pedido, status: newStatus as 'new' | 'preparing' | 'ready' | 'completed'} : pedido
+    ));
+    toast.info(`Pedido movido de volta para ${getStatusName(newStatus)}`);
+  };
+
   return (
     <main className="flex-1 overflow-y-auto p-3 md:p-6 bg-gradient-to-br from-acai-900 to-acai-800">
-      <Card className="neo-blur border-acai-700/30 shadow-glow overflow-hidden">
-        <CardHeader className="flex flex-row items-center justify-between pb-2 border-b border-acai-700/30">
-          <CardTitle className="text-xl font-bold text-gradient">Pedidos</CardTitle>
-          <Button 
-            onClick={handleCreatePedido} 
-            className="bg-acai-500/90 hover:bg-acai-500 shadow-md transition-all duration-300"
-          >
-            <Plus className="mr-1" size={16} /> Novo Pedido
-          </Button>
-        </CardHeader>
-        
-        <CardContent className="p-4">
-          <div className="mb-4 relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-acai-400" size={18} />
-            <input
-              type="text"
-              placeholder="Buscar por cliente, telefone ou ID..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 rounded-md bg-acai-800/70 backdrop-blur-sm border border-acai-700/30 text-acai-200 placeholder:text-acai-500 focus:ring-2 focus:ring-acai-500/50 focus:outline-none transition-all"
-            />
+      <div className="max-w-[1800px] mx-auto">
+        <div className="flex flex-col gap-6">
+          {/* Header with search and view toggle */}
+          <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+            <div className="flex items-center space-x-2 w-full md:w-auto">
+              <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-purple-200 to-purple-400 bg-clip-text text-transparent">Pedidos</h1>
+              <span className="bg-acai-600 text-white text-xs rounded-full px-2 py-0.5">{filteredPedidos.length}</span>
+            </div>
+            
+            <div className="flex flex-col md:flex-row gap-3 w-full md:w-auto">
+              <div className="relative flex-1 md:min-w-[300px]">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-acai-400" size={18} />
+                <input
+                  type="text"
+                  placeholder="Buscar pedidos..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-acai-800/40 backdrop-blur-md border border-acai-600/30 text-acai-100 placeholder:text-acai-400 focus:ring-2 focus:ring-acai-500/50 focus:outline-none transition-all shadow-inner"
+                />
+              </div>
+              
+              <div className="flex space-x-2 justify-end">
+                <Button 
+                  variant="outline" 
+                  className={`bg-acai-800/40 backdrop-blur-md border-acai-600/30 hover:bg-acai-700/50 ${viewMode === 'list' ? 'text-acai-300 border-acai-500' : 'text-acai-400'}`}
+                  onClick={() => setViewMode('list')}
+                >
+                  <Filter className="mr-1" size={16} />
+                  Lista
+                </Button>
+                <Button 
+                  variant="outline"
+                  className={`bg-acai-800/40 backdrop-blur-md border-acai-600/30 hover:bg-acai-700/50 ${viewMode === 'kanban' ? 'text-acai-300 border-acai-500' : 'text-acai-400'}`}
+                  onClick={() => setViewMode('kanban')}
+                >
+                  <Clock className="mr-1" size={16} />
+                  Kanban
+                </Button>
+                <Button 
+                  onClick={handleCreatePedido} 
+                  className="bg-gradient-to-r from-acai-500 to-acai-600 hover:from-acai-600 hover:to-acai-700 text-white shadow-lg shadow-acai-500/20"
+                >
+                  <Plus className="mr-1" size={16} /> Novo
+                </Button>
+              </div>
+            </div>
           </div>
-          
-          {isLoading ? (
-            <div className="flex justify-center my-8">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-acai-500"></div>
-            </div>
-          ) : filteredPedidos.length === 0 ? (
-            <div className="text-center my-8 text-acai-400">
-              {searchTerm ? 'Nenhum pedido encontrado para esta busca.' : 'Nenhum pedido registrado.'}
-            </div>
-          ) : (
-            <div className="overflow-x-auto rounded-md backdrop-blur-sm bg-acai-900/30 border border-acai-700/30">
-              <Table>
-                <TableHeader>
-                  <TableRow className="border-b border-acai-700/50">
-                    <TableHead className="text-acai-300 font-semibold">Cliente</TableHead>
-                    <TableHead className="text-acai-300 font-semibold">Itens</TableHead>
-                    <TableHead className="text-acai-300 font-semibold">Data</TableHead>
-                    <TableHead className="text-acai-300 font-semibold">Status</TableHead>
-                    <TableHead className="text-acai-300 font-semibold">Ações</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredPedidos.map((pedido) => (
-                    <TableRow key={pedido.id} className="border-b border-acai-800/50 hover:bg-acai-800/30 transition-colors duration-200">
-                      <TableCell>
-                        <div>
-                          <div className="font-medium text-acai-100">{pedido.customer_name}</div>
-                          <div className="text-xs text-acai-400">{pedido.phone}</div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        {pedido.items.map((item, idx) => (
-                          <div key={idx} className="text-sm text-acai-200">
-                            {item.quantity}x {item.name}
-                          </div>
+
+          {/* Content area with view options */}
+          <div className="bg-black/20 backdrop-blur-md rounded-xl border border-white/5 shadow-xl overflow-hidden">
+            {viewMode === 'list' ? (
+              <div className="p-4">
+                {isLoading ? (
+                  <div className="flex justify-center my-8">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-t-2 border-acai-500"></div>
+                  </div>
+                ) : filteredPedidos.length === 0 ? (
+                  <div className="text-center my-12 py-8">
+                    <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-acai-800/60 flex items-center justify-center">
+                      <Search className="text-acai-400" size={24} />
+                    </div>
+                    <h3 className="text-xl font-semibold text-acai-200">Nenhum pedido encontrado</h3>
+                    <p className="text-acai-400 mt-2">{searchTerm ? 'Tente outro termo de busca.' : 'Crie seu primeiro pedido clicando em "Novo".'}</p>
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto rounded-lg">
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="border-b border-acai-700/30">
+                          <TableHead className="text-acai-300 font-semibold">
+                            <div className="flex items-center">
+                              Cliente
+                              <ArrowDownUp size={14} className="ml-1 text-acai-500" />
+                            </div>
+                          </TableHead>
+                          <TableHead className="text-acai-300 font-semibold">Itens</TableHead>
+                          <TableHead className="text-acai-300 font-semibold">
+                            <div className="flex items-center">
+                              Data
+                              <ChevronDown size={14} className="ml-1 text-acai-500" />
+                            </div>
+                          </TableHead>
+                          <TableHead className="text-acai-300 font-semibold">Status</TableHead>
+                          <TableHead className="text-acai-300 font-semibold">Ações</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {filteredPedidos.map((pedido) => (
+                          <TableRow key={pedido.id} className="border-b border-acai-700/20 hover:bg-acai-800/40 transition-colors duration-200">
+                            <TableCell className="py-4">
+                              <div className="flex flex-col">
+                                <div className="font-medium text-acai-100">{pedido.customer_name}</div>
+                                <div className="flex items-center mt-1 text-xs text-acai-400">
+                                  <img 
+                                    src="/lovable-uploads/309e28ab-5886-4434-bf52-d2045d8d03f6.png" 
+                                    alt="WhatsApp" 
+                                    className="w-4 h-4 mr-1 opacity-80" 
+                                  />
+                                  {pedido.phone}
+                                </div>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="space-y-1">
+                                {pedido.items.map((item, idx) => (
+                                  <div key={idx} className="text-sm text-acai-200 flex items-center">
+                                    <span className="inline-block w-5 text-center text-acai-400">{item.quantity}x</span>
+                                    <span className="ml-1">{item.name}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-sm text-acai-400">
+                              {formatDate(pedido.created_at)}
+                            </TableCell>
+                            <TableCell>
+                              <span className={`px-3 py-1.5 rounded-full text-xs font-medium ${getStatusColor(pedido.status)} bg-opacity-20 text-white backdrop-blur-sm shadow-sm inline-flex items-center`}>
+                                <span className={`w-2 h-2 rounded-full ${getStatusColor(pedido.status)} mr-1.5`}></span>
+                                {getStatusName(pedido.status)}
+                              </span>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex space-x-1">
+                                <button 
+                                  onClick={() => handleEditPedido(pedido.id)} 
+                                  className="p-2 rounded-full bg-acai-700/30 hover:bg-acai-700/50 transition-colors duration-200 backdrop-blur-sm"
+                                >
+                                  <Edit size={16} className="text-acai-300" />
+                                </button>
+                                <button 
+                                  onClick={() => handleDeletePedido(pedido.id)} 
+                                  className="p-2 rounded-full bg-acai-700/30 hover:bg-red-800/40 transition-colors duration-200 backdrop-blur-sm"
+                                >
+                                  <Trash2 size={16} className="text-acai-300" />
+                                </button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
                         ))}
-                      </TableCell>
-                      <TableCell className="text-sm text-acai-400">
-                        {formatDate(pedido.created_at)}
-                      </TableCell>
-                      <TableCell>
-                        <span className={`px-2 py-1 rounded-full text-xs ${getStatusColor(pedido.status)} bg-opacity-30 text-white backdrop-blur-sm shadow-sm`}>
-                          {getStatusName(pedido.status)}
-                        </span>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex space-x-2">
-                          <button 
-                            onClick={() => handleEditPedido(pedido.id)} 
-                            className="p-1.5 rounded-full hover:bg-acai-700/50 transition-colors duration-200"
-                          >
-                            <Edit size={16} className="text-acai-300" />
-                          </button>
-                          <button 
-                            onClick={() => handleDeletePedido(pedido.id)} 
-                            className="p-1.5 rounded-full hover:bg-acai-700/50 transition-colors duration-200"
-                          >
-                            <Trash2 size={16} className="text-acai-300" />
-                          </button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="p-4 h-full">
+                <KanbanBoard
+                  newOrders={newOrders}
+                  preparingOrders={preparingOrders}
+                  readyOrders={readyOrders}
+                  completedOrders={completedOrders}
+                  onMoveOrder={handleMoveOrder}
+                  onMoveBackOrder={handleMoveBackOrder}
+                  onNewOrder={handleCreatePedido}
+                  isLoading={isLoading}
+                />
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
     </main>
   );
 };
