@@ -15,6 +15,9 @@ interface HourlySalesChartProps {
 const HourlySalesChart: React.FC<HourlySalesChartProps> = ({ data, colors }) => {
   const isMobile = useIsMobile();
   
+  // Blue color scheme based on reference image
+  const blueColors = ['#1EAEDB', '#33C3F0', '#0FA0CE', '#403E43', '#8EDCF7'];
+  
   return (
     <div className="bg-acai-800 bg-opacity-30 rounded-md p-3 md:p-5">
       <h3 className="text-base md:text-lg font-bold mb-3">Vendas por Hora</h3>
@@ -31,9 +34,11 @@ const HourlySalesChart: React.FC<HourlySalesChartProps> = ({ data, colors }) => 
               dataKey="valor"
               label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
               labelLine={false}
+              stroke="#000000"
+              strokeWidth={1}
             >
               {data.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
+                <Cell key={`cell-${index}`} fill={blueColors[index % blueColors.length]} />
               ))}
             </Pie>
             <Tooltip 
@@ -49,7 +54,7 @@ const HourlySalesChart: React.FC<HourlySalesChartProps> = ({ data, colors }) => 
           <div key={index} className="flex items-center text-xs">
             <div 
               className="w-3 h-3 mr-1" 
-              style={{ backgroundColor: colors[index % colors.length] }}
+              style={{ backgroundColor: blueColors[index % blueColors.length] }}
             ></div>
             <span>{entry.nome} ({entry.valor}%)</span>
           </div>

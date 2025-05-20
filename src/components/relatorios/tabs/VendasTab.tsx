@@ -17,15 +17,15 @@ const vendasPorDia = [
 ];
 
 const vendasPorHora = [
-  { nome: '10h-13h', valor: 25, color: '#7B2CBF' },
-  { nome: '13h-16h', valor: 30, color: '#9D4EDD' },
-  { nome: '16h-19h', valor: 22, color: '#5A189A' },
-  { nome: '19h-22h', valor: 15, color: '#3C096C' },
-  { nome: 'Outros', valor: 8, color: '#240046' },
+  { nome: '10h-13h', valor: 25, color: '#1EAEDB' },
+  { nome: '13h-16h', valor: 30, color: '#33C3F0' },
+  { nome: '16h-19h', valor: 22, color: '#0FA0CE' },
+  { nome: '19h-22h', valor: 15, color: '#403E43' },
+  { nome: 'Outros', valor: 8, color: '#8EDCF7' },
 ];
 
-// Cores para o gráfico de pizza
-const COLORS = ['#7B2CBF', '#9D4EDD', '#5A189A', '#3C096C', '#240046'];
+// Blue colors for the pie chart
+const COLORS = ['#1EAEDB', '#33C3F0', '#0FA0CE', '#403E43', '#8EDCF7'];
 
 interface VendasTabProps {
   salesData: {
