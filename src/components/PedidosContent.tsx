@@ -165,19 +165,19 @@ const PedidosContent = () => {
   );
 
   return (
-    <main className="flex-1 overflow-y-auto p-3 md:p-6">
-      <Card className="bg-acai-900 border-none shadow-xl">
-        <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-xl font-bold text-acai-50">Pedidos</CardTitle>
+    <main className="flex-1 overflow-y-auto p-3 md:p-6 bg-gradient-to-br from-acai-900 to-acai-800">
+      <Card className="neo-blur border-acai-700/30 shadow-glow overflow-hidden">
+        <CardHeader className="flex flex-row items-center justify-between pb-2 border-b border-acai-700/30">
+          <CardTitle className="text-xl font-bold text-gradient">Pedidos</CardTitle>
           <Button 
             onClick={handleCreatePedido} 
-            className="bg-acai-500 hover:bg-acai-600"
+            className="bg-acai-500/90 hover:bg-acai-500 shadow-md transition-all duration-300"
           >
             <Plus className="mr-1" size={16} /> Novo Pedido
           </Button>
         </CardHeader>
         
-        <CardContent>
+        <CardContent className="p-4">
           <div className="mb-4 relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-acai-400" size={18} />
             <input
@@ -185,7 +185,7 @@ const PedidosContent = () => {
               placeholder="Buscar por cliente, telefone ou ID..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 rounded-md bg-acai-800 border-none text-acai-200 placeholder:text-acai-500"
+              className="w-full pl-10 pr-4 py-2 rounded-md bg-acai-800/70 backdrop-blur-sm border border-acai-700/30 text-acai-200 placeholder:text-acai-500 focus:ring-2 focus:ring-acai-500/50 focus:outline-none transition-all"
             />
           </div>
           
@@ -198,29 +198,29 @@ const PedidosContent = () => {
               {searchTerm ? 'Nenhum pedido encontrado para esta busca.' : 'Nenhum pedido registrado.'}
             </div>
           ) : (
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto rounded-md backdrop-blur-sm bg-acai-900/30 border border-acai-700/30">
               <Table>
                 <TableHeader>
-                  <TableRow className="border-b border-acai-700">
-                    <TableHead className="text-acai-300">Cliente</TableHead>
-                    <TableHead className="text-acai-300">Itens</TableHead>
-                    <TableHead className="text-acai-300">Data</TableHead>
-                    <TableHead className="text-acai-300">Status</TableHead>
-                    <TableHead className="text-acai-300">Ações</TableHead>
+                  <TableRow className="border-b border-acai-700/50">
+                    <TableHead className="text-acai-300 font-semibold">Cliente</TableHead>
+                    <TableHead className="text-acai-300 font-semibold">Itens</TableHead>
+                    <TableHead className="text-acai-300 font-semibold">Data</TableHead>
+                    <TableHead className="text-acai-300 font-semibold">Status</TableHead>
+                    <TableHead className="text-acai-300 font-semibold">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredPedidos.map((pedido) => (
-                    <TableRow key={pedido.id} className="border-b border-acai-800 text-acai-200">
+                    <TableRow key={pedido.id} className="border-b border-acai-800/50 hover:bg-acai-800/30 transition-colors duration-200">
                       <TableCell>
                         <div>
-                          <div className="font-medium">{pedido.customer_name}</div>
+                          <div className="font-medium text-acai-100">{pedido.customer_name}</div>
                           <div className="text-xs text-acai-400">{pedido.phone}</div>
                         </div>
                       </TableCell>
                       <TableCell>
                         {pedido.items.map((item, idx) => (
-                          <div key={idx} className="text-sm">
+                          <div key={idx} className="text-sm text-acai-200">
                             {item.quantity}x {item.name}
                           </div>
                         ))}
@@ -229,7 +229,7 @@ const PedidosContent = () => {
                         {formatDate(pedido.created_at)}
                       </TableCell>
                       <TableCell>
-                        <span className={`px-2 py-1 rounded-full text-xs ${getStatusColor(pedido.status)} bg-opacity-20 text-white`}>
+                        <span className={`px-2 py-1 rounded-full text-xs ${getStatusColor(pedido.status)} bg-opacity-30 text-white backdrop-blur-sm shadow-sm`}>
                           {getStatusName(pedido.status)}
                         </span>
                       </TableCell>
@@ -237,13 +237,13 @@ const PedidosContent = () => {
                         <div className="flex space-x-2">
                           <button 
                             onClick={() => handleEditPedido(pedido.id)} 
-                            className="p-1 rounded-full hover:bg-acai-700"
+                            className="p-1.5 rounded-full hover:bg-acai-700/50 transition-colors duration-200"
                           >
                             <Edit size={16} className="text-acai-300" />
                           </button>
                           <button 
                             onClick={() => handleDeletePedido(pedido.id)} 
-                            className="p-1 rounded-full hover:bg-acai-700"
+                            className="p-1.5 rounded-full hover:bg-acai-700/50 transition-colors duration-200"
                           >
                             <Trash2 size={16} className="text-acai-300" />
                           </button>
