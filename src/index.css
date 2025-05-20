@@ -54,4 +54,22 @@
   body {
     @apply bg-background text-foreground;
   }
+  
+  .text-gradient {
+    @apply bg-gradient-to-br from-white to-white/80 bg-clip-text text-transparent drop-shadow-sm;
+  }
+  
+  .glass-card {
+    @apply bg-black/20 backdrop-blur-md border border-white/10;
+  }
+  
+  .neo-blur {
+    @apply backdrop-blur-xl bg-black/20 border border-white/10;
+  }
+}
+
+@layer utilities {
+  .shadow-glow {
+    box-shadow: 0 0 15px rgba(157, 78, 221, 0.4);
+  }
 }

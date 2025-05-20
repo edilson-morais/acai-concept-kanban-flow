@@ -24,7 +24,7 @@ const vendasPorHora = [
   { nome: 'Outros', valor: 8, color: '#8EDCF7' },
 ];
 
-// Blue colors for the pie chart
+// Blue colors for the pie chart with opacity for a more sophisticated look
 const COLORS = ['#1EAEDB', '#33C3F0', '#0FA0CE', '#403E43', '#8EDCF7'];
 
 interface VendasTabProps {
