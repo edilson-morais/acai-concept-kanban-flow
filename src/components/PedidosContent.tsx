@@ -12,11 +12,23 @@ import { Order } from '@/types';
 
 interface Pedido {
   id: string;
-  customer_name: string;
-  items: Array<{name: string; quantity: number}>;
-  phone: string;
-  status: 'new' | 'preparing' | 'ready' | 'completed';
+  numero_pedido: number;
+  cliente_id: string | null;
+  status: 'NOVO' | 'EM_PREPARO' | 'PRONTO' | 'FINALIZADO';
+  subtotal: number;
+  total: number;
+  observacoes: string | null;
   created_at: string;
+  clientes: {
+    nome: string;
+    telefone: string | null;
+  } | null;
+  itens_pedido: Array<{
+    quantidade: number;
+    produtos: {
+      nome: string;
+    } | null;
+  }>;
 }
 
 const PedidosContent = () => {
@@ -26,61 +38,43 @@ const PedidosContent = () => {
   const [viewMode, setViewMode] = useState<'list' | 'kanban'>('list');
   const isMobile = useIsMobile();
 
-  // Exemplo de pedidos para manter funcionalidade
-  const exemploPedidos: Pedido[] = [
-    {
-      id: '1',
-      customer_name: 'Maria Silva',
-      items: [{name: 'Açaí 500ml', quantity: 2}, {name: 'Mix Berry', quantity: 1}],
-      phone: '11999998888',
-      status: 'new',
-      created_at: new Date().toISOString()
-    },
-    {
-      id: '2',
-      customer_name: 'João Santos',
-      items: [{name: 'Açaí 300ml', quantity: 1}],
-      phone: '11988887777',
-      status: 'preparing',
-      created_at: new Date().toISOString()
-    }
-  ];
-
   const fetchPedidos = async () => {
     setIsLoading(true);
     try {
-      // Verificar se existe a tabela no Supabase usando as tabelas existentes
-      let hasTable = false;
-      try {
-        // Tentamos verificar se podemos obter dados de uma tabela existente
-        const { data: existingTableData } = await supabase
-          .from('adriana_producoes')
-          .select('count')
-          .limit(1)
-          .maybeSingle();
-          
-        hasTable = existingTableData !== null;
-      } catch (error) {
-        console.log('Erro ao verificar tabela existente:', error);
-        hasTable = false;
-      }
+      const { data, error } = await supabase
+        .from('pedidos')
+        .select(`
+          id,
+          numero_pedido,
+          cliente_id,
+          status,
+          subtotal,
+          total,
+          observacoes,
+          created_at,
+          clientes (
+            nome,
+            telefone
+          ),
+          itens_pedido (
+            quantidade,
+            produtos (
+              nome
+            )
+          )
+        `)
+        .order('created_at', { ascending: false });
 
-      if (!hasTable) {
-        // Se não encontrar tabela válida, usar dados de exemplo
-        setPedidos(exemploPedidos);
-        setIsLoading(false);
-        console.log('Usando dados de exemplo para pedidos');
+      if (error) {
+        console.error('Erro ao buscar pedidos:', error);
+        toast.error('Falha ao carregar pedidos');
         return;
       }
 
-      // Se chegou aqui, significa que pode haver uma tabela personalizada
-      // mas como não temos acesso a ela nos tipos, usamos dados de exemplo
-      setPedidos(exemploPedidos);
-      setIsLoading(false);
+      setPedidos(data || []);
     } catch (error) {
       console.error('Erro ao buscar pedidos:', error);
       toast.error('Falha ao carregar pedidos');
-      setPedidos(exemploPedidos); // Em caso de erro, usar dados de exemplo
     } finally {
       setIsLoading(false);
     }
@@ -97,8 +91,7 @@ const PedidosContent = () => {
         {
           event: '*',
           schema: 'public',
-          // Usamos qualquer tabela existente para o canal
-          table: 'adriana_producoes'
+          table: 'pedidos'
         },
         () => {
           fetchPedidos();
@@ -121,9 +114,19 @@ const PedidosContent = () => {
 
   const handleDeletePedido = async (id: string) => {
     try {
-      // Atualizamos apenas o estado local já que não temos a tabela real nos tipos
-      setPedidos(prevPedidos => prevPedidos.filter(pedido => pedido.id !== id));
+      const { error } = await supabase
+        .from('pedidos')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        console.error('Erro ao excluir pedido:', error);
+        toast.error('Falha ao remover pedido');
+        return;
+      }
+
       toast.success('Pedido removido com sucesso');
+      fetchPedidos(); // Atualizar lista
     } catch (error) {
       console.error('Erro ao excluir pedido:', error);
       toast.error('Falha ao remover pedido');
@@ -143,69 +146,109 @@ const PedidosContent = () => {
 
   const getStatusColor = (status: string) => {
     switch(status) {
-      case 'new': return 'bg-gradient-to-r from-blue-500 to-blue-600';
-      case 'preparing': return 'bg-gradient-to-r from-yellow-500 to-yellow-600';
-      case 'ready': return 'bg-gradient-to-r from-green-500 to-green-600';
-      case 'completed': return 'bg-gradient-to-r from-purple-500 to-purple-600';
+      case 'NOVO': return 'bg-gradient-to-r from-blue-500 to-blue-600';
+      case 'EM_PREPARO': return 'bg-gradient-to-r from-yellow-500 to-yellow-600';
+      case 'PRONTO': return 'bg-gradient-to-r from-green-500 to-green-600';
+      case 'FINALIZADO': return 'bg-gradient-to-r from-purple-500 to-purple-600';
       default: return 'bg-gradient-to-r from-gray-500 to-gray-600';
     }
   };
 
   const getStatusName = (status: string) => {
     switch(status) {
-      case 'new': return 'Novo';
-      case 'preparing': return 'Em Preparo';
-      case 'ready': return 'Pronto';
-      case 'completed': return 'Finalizado';
+      case 'NOVO': return 'Novo';
+      case 'EM_PREPARO': return 'Em Preparo';
+      case 'PRONTO': return 'Pronto';
+      case 'FINALIZADO': return 'Finalizado';
       default: return status;
     }
   };
 
-  const filteredPedidos = pedidos.filter(pedido => 
-    pedido.customer_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    pedido.phone.includes(searchTerm) ||
-    pedido.id.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredPedidos = pedidos.filter(pedido => {
+    const customerName = pedido.clientes?.nome || 'Cliente não informado';
+    const phone = pedido.clientes?.telefone || '';
+    return customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+           phone.includes(searchTerm) ||
+           pedido.numero_pedido.toString().includes(searchTerm);
+  });
 
   // Convert Pedidos to Orders for Kanban view
   const convertToOrders = (pedidos: Pedido[]): Order[] => {
     return pedidos.map(pedido => ({
       id: pedido.id,
-      customerName: pedido.customer_name,
-      items: pedido.items.map(item => `${item.quantity}x ${item.name}`),
-      phone: pedido.phone,
-      status: pedido.status,
+      customerName: pedido.clientes?.nome || 'Cliente não informado',
+      items: pedido.itens_pedido.map(item => 
+        `${item.quantidade}x ${item.produtos?.nome || 'Produto'}`
+      ),
+      phone: pedido.clientes?.telefone || '',
+      status: pedido.status.toLowerCase() as 'new' | 'preparing' | 'ready' | 'completed',
       time: formatDate(pedido.created_at)
     }));
   };
 
-  const newOrders = convertToOrders(filteredPedidos.filter(p => p.status === 'new'));
-  const preparingOrders = convertToOrders(filteredPedidos.filter(p => p.status === 'preparing'));
-  const readyOrders = convertToOrders(filteredPedidos.filter(p => p.status === 'ready'));
-  const completedOrders = convertToOrders(filteredPedidos.filter(p => p.status === 'completed'));
+  const newOrders = convertToOrders(filteredPedidos.filter(p => p.status === 'NOVO'));
+  const preparingOrders = convertToOrders(filteredPedidos.filter(p => p.status === 'EM_PREPARO'));
+  const readyOrders = convertToOrders(filteredPedidos.filter(p => p.status === 'PRONTO'));
+  const completedOrders = convertToOrders(filteredPedidos.filter(p => p.status === 'FINALIZADO'));
 
-  const handleMoveOrder = (id: string, currentStatus: string) => {
-    const newStatus = 
-      currentStatus === 'new' ? 'preparing' :
-      currentStatus === 'preparing' ? 'ready' :
-      currentStatus === 'ready' ? 'completed' : 'completed';
+  const handleMoveOrder = async (id: string, currentStatus: string) => {
+    const statusMap: { [key: string]: string } = {
+      'NOVO': 'EM_PREPARO',
+      'EM_PREPARO': 'PRONTO',
+      'PRONTO': 'FINALIZADO',
+      'FINALIZADO': 'FINALIZADO'
+    };
 
-    setPedidos(prevPedidos => prevPedidos.map(pedido => 
-      pedido.id === id ? {...pedido, status: newStatus as 'new' | 'preparing' | 'ready' | 'completed'} : pedido
-    ));
-    toast.success(`Pedido movido para ${getStatusName(newStatus)}`);
+    const newStatus = statusMap[currentStatus.toUpperCase()] || currentStatus;
+
+    try {
+      const { error } = await supabase
+        .from('pedidos')
+        .update({ status: newStatus as 'NOVO' | 'EM_PREPARO' | 'PRONTO' | 'FINALIZADO' })
+        .eq('id', id);
+
+      if (error) {
+        console.error('Erro ao atualizar status do pedido:', error);
+        toast.error('Falha ao atualizar status do pedido');
+        return;
+      }
+
+      toast.success(`Pedido movido para ${getStatusName(newStatus)}`);
+      fetchPedidos(); // Atualizar lista
+    } catch (error) {
+      console.error('Erro ao atualizar status do pedido:', error);
+      toast.error('Falha ao atualizar status do pedido');
+    }
   };
 
-  const handleMoveBackOrder = (id: string, currentStatus: string) => {
-    const newStatus = 
-      currentStatus === 'preparing' ? 'new' :
-      currentStatus === 'ready' ? 'preparing' :
-      currentStatus === 'completed' ? 'ready' : 'new';
+  const handleMoveBackOrder = async (id: string, currentStatus: string) => {
+    const statusMap: { [key: string]: string } = {
+      'EM_PREPARO': 'NOVO',
+      'PRONTO': 'EM_PREPARO',
+      'FINALIZADO': 'PRONTO',
+      'NOVO': 'NOVO'
+    };
 
-    setPedidos(prevPedidos => prevPedidos.map(pedido => 
-      pedido.id === id ? {...pedido, status: newStatus as 'new' | 'preparing' | 'ready' | 'completed'} : pedido
-    ));
-    toast.info(`Pedido movido de volta para ${getStatusName(newStatus)}`);
+    const newStatus = statusMap[currentStatus.toUpperCase()] || currentStatus;
+
+    try {
+      const { error } = await supabase
+        .from('pedidos')
+        .update({ status: newStatus as 'NOVO' | 'EM_PREPARO' | 'PRONTO' | 'FINALIZADO' })
+        .eq('id', id);
+
+      if (error) {
+        console.error('Erro ao atualizar status do pedido:', error);
+        toast.error('Falha ao atualizar status do pedido');
+        return;
+      }
+
+      toast.info(`Pedido movido de volta para ${getStatusName(newStatus)}`);
+      fetchPedidos(); // Atualizar lista
+    } catch (error) {
+      console.error('Erro ao atualizar status do pedido:', error);
+      toast.error('Falha ao atualizar status do pedido');
+    }
   };
 
   return (
@@ -281,11 +324,13 @@ const PedidosContent = () => {
                         <TableRow className="border-b border-acai-700/30">
                           <TableHead className="text-acai-300 font-semibold">
                             <div className="flex items-center">
-                              Cliente
+                              Pedido
                               <ArrowDownUp size={14} className="ml-1 text-acai-500" />
                             </div>
                           </TableHead>
+                          <TableHead className="text-acai-300 font-semibold">Cliente</TableHead>
                           <TableHead className="text-acai-300 font-semibold">Itens</TableHead>
+                          <TableHead className="text-acai-300 font-semibold">Total</TableHead>
                           <TableHead className="text-acai-300 font-semibold">
                             <div className="flex items-center">
                               Data
@@ -300,26 +345,41 @@ const PedidosContent = () => {
                         {filteredPedidos.map((pedido) => (
                           <TableRow key={pedido.id} className="border-b border-acai-700/20 hover:bg-acai-800/40 transition-colors duration-200">
                             <TableCell className="py-4">
+                              <div className="font-medium text-acai-100">#{pedido.numero_pedido}</div>
+                            </TableCell>
+                            <TableCell className="py-4">
                               <div className="flex flex-col">
-                                <div className="font-medium text-acai-100">{pedido.customer_name}</div>
-                                <div className="flex items-center mt-1 text-xs text-acai-400">
-                                  <img 
-                                    src="/lovable-uploads/309e28ab-5886-4434-bf52-d2045d8d03f6.png" 
-                                    alt="WhatsApp" 
-                                    className="w-4 h-4 mr-1 opacity-80" 
-                                  />
-                                  {pedido.phone}
-                                </div>
+                                <div className="font-medium text-acai-100">{pedido.clientes?.nome || 'Cliente não informado'}</div>
+                                {pedido.clientes?.telefone && (
+                                  <div className="flex items-center mt-1 text-xs text-acai-400">
+                                    <img 
+                                      src="/lovable-uploads/309e28ab-5886-4434-bf52-d2045d8d03f6.png" 
+                                      alt="WhatsApp" 
+                                      className="w-4 h-4 mr-1 opacity-80" 
+                                    />
+                                    {pedido.clientes.telefone}
+                                  </div>
+                                )}
                               </div>
                             </TableCell>
                             <TableCell>
                               <div className="space-y-1">
-                                {pedido.items.map((item, idx) => (
+                                {pedido.itens_pedido.slice(0, 3).map((item, idx) => (
                                   <div key={idx} className="text-sm text-acai-200 flex items-center">
-                                    <span className="inline-block w-5 text-center text-acai-400">{item.quantity}x</span>
-                                    <span className="ml-1">{item.name}</span>
+                                    <span className="inline-block w-5 text-center text-acai-400">{item.quantidade}x</span>
+                                    <span className="ml-1">{item.produtos?.nome || 'Produto'}</span>
                                   </div>
                                 ))}
+                                {pedido.itens_pedido.length > 3 && (
+                                  <div className="text-xs text-acai-400">
+                                    +{pedido.itens_pedido.length - 3} item(s)
+                                  </div>
+                                )}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="font-medium text-acai-100">
+                                R$ {pedido.total?.toFixed(2) || '0,00'}
                               </div>
                             </TableCell>
                             <TableCell className="text-sm text-acai-400">
